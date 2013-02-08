@@ -3,6 +3,7 @@ var canvas;
 var context;
 
 var objects = [];
+var player = null;
 
 function main() {
 
@@ -22,7 +23,8 @@ function main() {
 
   setInterval(process, 1000/60);
 
-  objects.push(makeObject({x: 45, y: 45}));
+  player = makeObject({x: 45, y: 45})
+  objects.push(player);
 }
 
 function process() {
@@ -38,12 +40,11 @@ function draw() {
 }
 
 function makeObject(pos) {
-  var vel = {x: 0, y: 0};
-  var gravity = .1;
+  var vel = [0, 0];
+
   function process() {
-    vel.y += gravity;
-    pos.x += vel.x;
-    pos.y += vel.y;
+    pos.x += vel[0] * 10;
+    pos.y += vel[1] * 10;
   }
   function draw(context) {
     context.fillStyle = '#000';
@@ -51,11 +52,39 @@ function makeObject(pos) {
     context.fillStyle = '#f00';
     context.fillRect(pos.x+1, pos.y+1, tileSize-2, tileSize-2);
   }
-  return {draw: draw, process: process};
+  return {draw: draw, process: process, vel: vel};
 }
 
 function drawObjects() {
   objects.forEach(function(object) {
     object.draw(context);
   });
+}
+
+var keyDirs = {
+  87: [0, -1],
+  65: [0, 1],
+  83: [-1, 0],
+  68: [1, 0]
+}
+
+function pe(a, b) {
+  a[0] += b[0];
+  a[1] += b[1];
+}
+
+function me(a, b) {
+  a[0] -= b[0];
+  a[1] -= b[1];
+}
+
+onkeydown = function(k) {
+  var dir = keyDirs[k.keyCode];
+  pe(player.vel, dir);
+}
+
+onkeyup = function(k) {
+  if (!player) return;
+  var dir = keyDirs[k.keyCode];
+  me(player.vel, dir);
 }
