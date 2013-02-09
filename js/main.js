@@ -161,9 +161,12 @@ onclick = function(mouseEvent) {
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   create_bullet(player.position, fire_vector);
 }
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
   create_bullet(player_loc, fire_vector);
