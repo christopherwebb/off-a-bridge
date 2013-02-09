@@ -136,7 +136,6 @@ function draw() {
   drawBullets();
 }
 
-
 function makeObject(id, _position, graphic) {
   var id = id;
   var speed = b2Vec2.Make(0, 0);
@@ -261,11 +260,10 @@ onmousemove = function(mouseEvent) {
 }
 
 onclick = function(mouseEvent) {
-  fire_vector = mouse_movement.Copy();
+  var mouse_click = b2Vec2.Make(mouseEvent.x, mouseEvent.y);
+  fire_vector = mouse_click.Copy();
   fire_vector.Subtract(me.position);
   fire_vector.Normalize();
-  // create_bullet(me.position, fire_vector);
-  // create_bullet(me, fire_vector);
 
   bullet_data = {
       id: _get_id(),
@@ -317,4 +315,29 @@ make_bullet = function(bullet_data) {
   }
 
   return {id: id, draw: draw, process: process, speed: speed, position: position};
+}
+
+create_bullet = function(player_loc, bullet_vector) {
+  var circleSd = new b2CircleDef();
+  circleSd.density = 1.0;
+  circleSd.radius = 20;
+  circleSd.restitution = 1.0;
+  circleSd.friction = 0;
+  var circleBd = new b2BodyDef();
+  circleBd.AddShape(circleSd);
+  circleBd.type = b2_kinematicBody;
+  circleBd.bullet = true;
+  circleBd.position.Set(player_loc.x,player_loc.y);
+  var circleBody = world.CreateBody(circleBd);
+
+  var bullet = makeObject({
+    x: player_loc.x,
+    y: player_loc.y
+  }, tileSize / 8);
+
+  bullet.process = function() {
+    bullet.position.x = circleBd.position.x;
+    bullet.position.y = circleBd.position.y;
+  }
+  objects.push(bullet);
 }
