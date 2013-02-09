@@ -57,7 +57,7 @@ function main() {
     onPlayerReceived(data);
   });
 
-  socket.emit('initialize'); // ask for the enemies!
+  socket.emit('retrieve'); // ask for the enemies!
   socket.on('players', function (data) {
     onPlayersReceived(data);
   });
@@ -71,6 +71,10 @@ function onPlayerReceived(player) {
       players[player.id].position.x = player.x;
       players[player.id].position.y = player.y;
       process();
+    } else {
+      // One ID that I don't know? Let's update the list!
+      console.log('What is going on here?');
+      socket.emit('retrieve');
     }
   }
 }

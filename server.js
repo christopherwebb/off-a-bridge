@@ -33,7 +33,7 @@ var onConnection = function (socket) {
     });
   });
 
-  socket.on('initialize', function () {
+  socket.on('retrieve', function () {
     clients.push(socket);
     socket.emit('players', players);
   });
