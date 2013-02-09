@@ -1,12 +1,12 @@
-var tileSize = 32;
+var TILE_SIZE = 16;
 
-var mapWidth = 20;
-var mapHeight = 15;
+var MAP_WIDTH = 40;
+var MAP_HEIGHT = 30;
 
 var map = [];
 
 function mapIndex(pos) {
-  return pos.y * mapWidth + pos.x;
+  return pos.y * MAP_WIDTH + pos.x;
 }
 
 function setMap(pos, tile) {
@@ -14,19 +14,19 @@ function setMap(pos, tile) {
 }
 
 function drawMap() {
-  for (var y=0; y<mapHeight; y++)
-  for (var x=0; x<mapWidth; x++) {
+  for (var y=0; y<MAP_HEIGHT; y++)
+  for (var x=0; x<MAP_WIDTH; x++) {
 
     var cell = map[mapIndex({x:x, y:y})];
 
-    var px = x * tileSize;
-    var py = y * tileSize;
+    var px = x * TILE_SIZE;
+    var py = y * TILE_SIZE;
     context.fillStyle = '#000';
-    context.fillRect(px, py, tileSize, tileSize);
+    context.fillRect(px, py, TILE_SIZE, TILE_SIZE);
     if (cell == 'wall')
       context.fillStyle = '#a66';
     else
       context.fillStyle = '#eef';
-    context.fillRect(px+1, py+1, tileSize-2, tileSize-2);
+    context.fillRect(px+1, py+1, TILE_SIZE-2, TILE_SIZE-2);
   }
 }
