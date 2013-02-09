@@ -12,7 +12,7 @@ function main() {
   var worldAABB = new b2AABB();
   worldAABB.minVertex.Set(-1000, -1000);
   worldAABB.maxVertex.Set(1000, 1000);
-  var gravity = new b2Vec2(0, 0);
+  var gravity = b2Vec2.Make(0, 0);
   var doSleep = true;
   var world = new b2World(worldAABB, gravity, doSleep);
 
@@ -42,7 +42,7 @@ function main() {
   // TODO: update coords just in movements
   setInterval(updateServer, 1000);
 
-  player = makeObject({x: 45, y: 45})
+  player = makeObject(b2Vec2.Make(45, 45));
   objects.push(player);
 }
 
@@ -63,11 +63,12 @@ function draw() {
 }
 
 function makeObject(position) {
-  var speed = [0, 0];
+  var speed = b2Vec2.Make(0, 0);
 
   function process() {
-    position.x += speed[0] * 10;
-    position.y += speed[1] * 10;
+    var ms = speed.Copy();
+    ms.Multiply(25);
+    position.Add(ms);
   }
   function draw(context) {
     context.fillStyle = '#000';
@@ -84,38 +85,47 @@ function drawObjects() {
   });
 }
 
+function v(x, y) { return b2Vec2.Make(x, y); }
+
 var keyDirections = {
-  87: [0, -0.1],
-  65: [-0.1, 0],
-  83: [0, 0.1],
-  68: [0.1, 0]
+  87: v(0, -0.1),
+  65: v(-0.1, 0),
+  83: v(0, 0.1),
+  68: v(0.1, 0)
 }
 
-function pe(a, b) {
-  a[0] += b[0];
-  a[1] += b[1];
-}
-
-function me(a, b) {
-  a[0] -= b[0];
-  a[1] -= b[1];
-}
+var keyStates = {};
 
 onkeydown = function(key) {
+  if (keyStates[key.keyCode])
+    return;
+
+  keyStates[key.keyCode] = 1;
+
+  if (!player)
+    return;
+
   var direction = keyDirections[key.keyCode];
-  if (direction !== undefined) pe(player.speed, direction);
+  if (direction !== undefined)
+    player.speed.Add(direction);
 }
 
 onkeyup = function(key) {
-  if (!player) return;
+  delete keyStates[key.keyCode];
+
+  if (!player)
+    return;
+
   var direction = keyDirections[key.keyCode];
-  if (direction !== undefined) me(player.speed, direction);
+  if (direction !== undefined)
+    player.speed.Subtract(direction);
 }
 
 onclick = function(mouseEvent) {
   mouse_click = b2Vec2.Make(mouseEvent.x, mouseEvent.y);
-  fire_vector = mouse_click.Subtract(player_loc);
+  fire_vector = mouse_click.Copy();
+  fire_vector.Subtract(player.position);
   fire_vector.Normalize();
 
-  create_bullet(player_loc, fire_vector);
+  create_bullet(player.position, fire_vector);
 }
