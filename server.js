@@ -16,13 +16,25 @@ io.sockets.on('connection', function (socket) {
   onConnection(socket);
 });
 
+var players = [];
+var clients = [];
+
 var onConnection = function (socket) {
   socket.emit('server', {status: 'connected'});
 
   socket.on('player', function (data) {
-    // Just proxy it
-    player = JSON.parse(data)[0]; // TBR
-    console.log(player._id); // TBR
-    socket.emit('player', player);
+    player = JSON.parse(data)[0];
+
+    players[player.id] = player;
+
+    clients.forEach(function (client) {
+      // Use broadcast? This should be able to be used with WAN too
+      client.emit('player', player);
+    });
+  });
+
+  socket.on('initialize', function () {
+    clients.push(socket);
+    socket.emit('players', players);
   });
 };

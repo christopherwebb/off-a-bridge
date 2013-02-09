@@ -3,11 +3,16 @@ var MAX_SPEED = 1;
 var canvas;
 var context;
 
-var objects = [];
-var player = null;
+var players = [];
+var me = null;
 
 var socket = io.connect('http://localhost:8000');
 
+
+function _get_id() {
+  // TODO: perhaps we need something more unique here
+  return Math.floor(Math.random() * 1025);
+}
 function main() {
   // Set up Box2D world
   var worldAABB = new b2AABB();
@@ -40,56 +45,88 @@ function main() {
   context = canvas.getContext('2d');
 
   setInterval(process, 1000 / 60);
-  // TODO: update coords just in movements
-  setInterval(updateServer, 1000);
+  setInterval(updateServer, 10);
 
-  player = makeObject(b2Vec2.Make(MAP_WIDTH/2*TILE_SIZE, MAP_HEIGHT/2*TILE_SIZE));
-  enemy = makeObject({x: 100, y: 100});
-  objects.push(player);
-  objects.push(enemy);
+  me = makeObject(
+    _get_id(),
+    b2Vec2.Make(MAP_WIDTH/2*TILE_SIZE, MAP_HEIGHT/2*TILE_SIZE)
+  );
+  players[me.id] = me;
 
   socket.on('player', function (data) {
-    console.log('Received');
-    received_player = JSON.parse(data)[0];
-    objects.forEach(function(object) {
-      if (object._id === received_player._id) {
-        object.position.x = received_player.x;
-        object.position.y = received_player.y;
-        process();
-      }
-    });
+    onPlayerReceived(data);
+  });
+
+  socket.emit('initialize'); // ask for the enemies!
+  socket.on('players', function (data) {
+    onPlayersReceived(data);
   });
 }
 
+
+function onPlayerReceived(player) {
+  // Update the position of the received player
+  if (player.id !== me.id) {
+    if (players[player.id]) {
+      players[player.id].position.x = player.x;
+      players[player.id].position.y = player.y;
+      process();
+    }
+  }
+}
+
+
+function onPlayersReceived(received_players) {
+  // Create all the player objects
+  received_players.forEach(function(player) {
+    if (player && player.id !== me.id) {
+      // With random id it can be possible a collision here
+      player = makeObject(
+        player.id,
+        {
+          x: player.x,
+          y: player.y
+        }
+      )
+      players[player.id] = player;
+    }
+  });
+}
+
+
 function process() {
-  objects.forEach(function(object) {
-    object.process();
+  players.forEach(function(player) {
+    player.process();
   });
   draw();
 }
 
+
 function updateServer() {
-  socket.emit(
-    'player',
+  socket.emit('player',
     {
-      _id: 1, // TODO: with several player this should be generated
-      x: player.position.x,
-      y: player.position.y
-    });
+      id: me.id,
+      x: me.position.x,
+      y: me.position.y
+    }
+  );
 }
+
 
 function draw() {
   drawMap();
-  drawObjects();
+  drawPlayers();
 }
 
-function makeObject(position) {
+
+function makeObject(id, position) {
+  var id = id;
   var speed = b2Vec2.Make(0, 0);
 
   function process() {
     var ms = speed.Copy();
     ms.Multiply(25);
-    player.position.Add(ms);
+    me.position.Add(ms);
   }
   function draw(context) {
     context.fillStyle = '#000';
@@ -107,25 +144,33 @@ function makeObject(position) {
       TILE_SIZE - 2
     );
   }
-  return {draw: draw, process: process, speed: speed, position: position};
+  return {id: id, draw: draw, process: process, speed: speed, position: position};
 }
 
-function drawObjects() {
-  objects.forEach(function(object) {
-    object.draw(context);
+
+function drawPlayers() {
+  players.forEach(function(player) {
+    player.draw(context);
   });
 }
 
-function v(x, y) { return b2Vec2.Make(x, y); }
 
+function v(x, y) { return b2Vec2.Make(x, y); }
 var keyDirections = {
+  38: v(0, -0.1), // up
+  37: v(-0.1, 0), // left
+  40: v(0, 0.1), // down
+  39: v(0.1, 0), // right
+
   87: v(0, -0.1), // up
   65: v(-0.1, 0), // left
   83: v(0, 0.1), // down
   68: v(0.1, 0) // right
 }
 
+
 var keyStates = {};
+
 
 onkeydown = function(key) {
   if (keyStates[key.keyCode])
@@ -133,23 +178,28 @@ onkeydown = function(key) {
 
   keyStates[key.keyCode] = 1;
 
-  if (!player)
+  if (!me)
     return;
 
   var direction = keyDirections[key.keyCode];
   if (direction !== undefined)
-    player.speed.Add(direction);
+    me.speed.Add(direction);
+
+  updateServer();
 }
+
 
 onkeyup = function(key) {
   delete keyStates[key.keyCode];
 
-  if (!player)
+  if (!me)
     return;
 
   var direction = keyDirections[key.keyCode];
   if (direction !== undefined)
-    player.speed.Subtract(direction);
+    me.speed.Subtract(direction);
+
+  updateServer();
 }
 
 /* Remove the comment after Chris merge
@@ -158,16 +208,6 @@ onclick = function(mouseEvent) {
   fire_vector = mouse_click.Copy();
   fire_vector.Subtract(player.position);
   fire_vector.Normalize();
-
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
   create_bullet(player.position, fire_vector);
-}
-=======
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
   create_bullet(player_loc, fire_vector);
 }*/
