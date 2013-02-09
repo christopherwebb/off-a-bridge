@@ -1,3 +1,5 @@
+var MAX_SPEED = 1;
+
 var canvas;
 var context;
 
@@ -7,7 +9,6 @@ var player = null;
 var socket = io.connect('http://localhost:8000');
 
 function main() {
-
   // Set up Box2D world
   var worldAABB = new b2AABB();
   worldAABB.minVertex.Set(-1000, -1000);
@@ -16,9 +17,9 @@ function main() {
   var doSleep = true;
   var world = new b2World(worldAABB, gravity, doSleep);
 
-  for (var y=0; y<mapHeight; y++)
-  for (var x=0; x<mapWidth; x++) {
-    if (x == 0 || y == 0 || x+1==mapWidth || y+1==mapHeight) {
+  for (var y=0; y<MAP_HEIGHT; y++)
+  for (var x=0; x<MAP_WIDTH; x++) {
+    if (x == 0 || y == 0 || x+1==MAP_WIDTH || y+1==MAP_HEIGHT) {
       setMap({x:x, y:y}, 'wall');
       var wall_shape = new b2BoxDef();
       wall_shape.restitution = 0.1;
@@ -42,7 +43,7 @@ function main() {
   // TODO: update coords just in movements
   setInterval(updateServer, 1000);
 
-  player = makeObject({x: 45, y: 45})
+  player = makeObject({x: MAP_WIDTH/2*TILE_SIZE, y: MAP_HEIGHT/2*TILE_SIZE})
   objects.push(player);
 }
 
@@ -54,7 +55,13 @@ function process() {
 }
 
 function updateServer() {
-  socket.emit('player', {test: player.position.x + "," + player.position.y});
+  socket.emit(
+    'player',
+    {
+      _id: 1, // TODO: with several player this should be generated
+      x: player.position.x,
+      y: player.position.y
+    });
 }
 
 function draw() {
@@ -71,9 +78,9 @@ function makeObject(position) {
   }
   function draw(context) {
     context.fillStyle = '#000';
-    context.fillRect(position.x, position.y, tileSize, tileSize);
+    context.fillRect(position.x, position.y, TILE_SIZE, TILE_SIZE);
     context.fillStyle = '#f00';
-    context.fillRect(position.x+1, position.y+1, tileSize-2, tileSize-2);
+    context.fillRect(position.x+1, position.y+1, TILE_SIZE-2, TILE_SIZE-2);
   }
   return {draw: draw, process: process, speed: speed, position: position};
 }
@@ -91,22 +98,24 @@ var keyDirections = {
   68: [0.1, 0]
 }
 
-function pe(a, b) {
-  a[0] += b[0];
-  a[1] += b[1];
+function pe(speed, direction) {
+  if (speed[0] <= MAX_SPEED)
+    speed[0] += direction[0];
+  if (speed[1] <= MAX_SPEED)
+    speed[1] += direction[1];
 }
 
-function me(a, b) {
-  a[0] -= b[0];
-  a[1] -= b[1];
+function me(speed, direction) {
+  speed[0] -= direction[0];
+  speed[1] -= direction[1];
 }
 
-onkeydown = function(key) {
+onkeydown = function (key) {
   var direction = keyDirections[key.keyCode];
   if (direction !== undefined) pe(player.speed, direction);
 }
 
-onkeyup = function(key) {
+onkeyup = function (key) {
   if (!player) return;
   var direction = keyDirections[key.keyCode];
   if (direction !== undefined) me(player.speed, direction);

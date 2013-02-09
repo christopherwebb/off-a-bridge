@@ -17,7 +17,7 @@ io.sockets.on('connection', function (socket) {
 });
 
 var onConnection = function (socket) {
-  socket.emit('news', {hello: 'world'});
+  socket.emit('server', {status: 'connected'});
 
   socket.on('player', function (data) {
     console.log(data);
