@@ -8,10 +8,26 @@ var socket = io.connect('http://localhost:8000');
 
 function main() {
 
+  // Set up Box2D world
+  var worldAABB = new b2AABB();
+  worldAABB.minVertex.Set(-1000, -1000);
+  worldAABB.maxVertex.Set(1000, 1000);
+  var gravity = new b2Vec2(0, 0);
+  var doSleep = true;
+  var world = new b2World(worldAABB, gravity, doSleep);
+
   for (var y=0; y<mapHeight; y++)
   for (var x=0; x<mapWidth; x++) {
     if (x == 0 || y == 0 || x+1==mapWidth || y+1==mapHeight) {
       setMap({x:x, y:y}, 'wall');
+      var wall_shape = new b2BoxDef();
+      wall_shape.restitution = 0.1;
+      wall_shape.extents.Set(0.5,0.5);
+
+      var wall_body = new b2BodyDef();
+      wall_body.AddShape(wall_shape);
+      wall_body.position.Set(x, y);
+      world.CreateBody(wall_body);
     }
   }
 
@@ -94,4 +110,12 @@ onkeyup = function(key) {
   if (!player) return;
   var direction = keyDirections[key.keyCode];
   if (direction !== undefined) me(player.speed, direction);
+}
+
+onclick = function(mouseEvent) {
+  mouse_click = b2Vec2.Make(mouseEvent.x, mouseEvent.y);
+  fire_vector = mouse_click.Subtract(player_loc);
+  fire_vector.Normalize();
+
+  create_bullet(player_loc, fire_vector);
 }
