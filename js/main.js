@@ -1,9 +1,10 @@
-
 var canvas;
 var context;
 
 var objects = [];
 var player = null;
+
+var socket = io.connect('http://localhost:8000');
 
 function main() {
 
@@ -22,6 +23,8 @@ function main() {
   context = canvas.getContext('2d');
 
   setInterval(process, 1000/60);
+  // TODO: update coords just in movements
+  setInterval(updateServer, 1000);
 
   player = makeObject({x: 45, y: 45})
   objects.push(player);
@@ -34,25 +37,29 @@ function process() {
   draw();
 }
 
+function updateServer() {
+  socket.emit('player', {test: player.position.x + "," + player.position.y});
+}
+
 function draw() {
   drawMap();
   drawObjects();
 }
 
-function makeObject(pos) {
-  var vel = [0, 0];
+function makeObject(position) {
+  var speed = [0, 0];
 
   function process() {
-    pos.x += vel[0] * 10;
-    pos.y += vel[1] * 10;
+    position.x += speed[0] * 10;
+    position.y += speed[1] * 10;
   }
   function draw(context) {
     context.fillStyle = '#000';
-    context.fillRect(pos.x, pos.y, tileSize, tileSize);
+    context.fillRect(position.x, position.y, tileSize, tileSize);
     context.fillStyle = '#f00';
-    context.fillRect(pos.x+1, pos.y+1, tileSize-2, tileSize-2);
+    context.fillRect(position.x+1, position.y+1, tileSize-2, tileSize-2);
   }
-  return {draw: draw, process: process, vel: vel};
+  return {draw: draw, process: process, speed: speed, position: position};
 }
 
 function drawObjects() {
@@ -61,7 +68,7 @@ function drawObjects() {
   });
 }
 
-var keyDirs = {
+var keyDirections = {
   87: [0, -0.1],
   65: [-0.1, 0],
   83: [0, 0.1],
@@ -78,13 +85,13 @@ function me(a, b) {
   a[1] -= b[1];
 }
 
-onkeydown = function(k) {
-  var dir = keyDirs[k.keyCode];
-  if (dir !== undefined) pe(player.vel, dir);
+onkeydown = function(key) {
+  var direction = keyDirections[key.keyCode];
+  if (directio !== undefined) pe(player.speed, direction);
 }
 
-onkeyup = function(k) {
+onkeyup = function(key) {
   if (!player) return;
-  var dir = keyDirs[k.keyCode];
-  if (dir !== undefined) me(player.vel, dir);
+  var direction = keyDirections[key.keyCode];
+  if (direction !== undefined) me(player.speed, direction);
 }

@@ -19,7 +19,7 @@ io.sockets.on('connection', function (socket) {
 var onConnection = function (socket) {
   socket.emit('news', {hello: 'world'});
 
-  socket.on('my other event', function (data) {
+  socket.on('player', function (data) {
     console.log(data);
   });
 };
