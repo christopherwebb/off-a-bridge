@@ -23,7 +23,7 @@ function main() {
       setMap({x:x, y:y}, 'wall');
       var wall_shape = new b2BoxDef();
       wall_shape.restitution = 0.1;
-      wall_shape.extents.Set(0.5,0.5);
+      wall_shape.extents.Set(0.5, 0.5);
 
       var wall_body = new b2BodyDef();
       wall_body.AddShape(wall_shape);
@@ -39,12 +39,26 @@ function main() {
 
   context = canvas.getContext('2d');
 
-  setInterval(process, 1000/60);
+  setInterval(process, 1000 / 60);
   // TODO: update coords just in movements
   setInterval(updateServer, 1000);
 
   player = makeObject(b2Vec2.Make(MAP_WIDTH/2*TILE_SIZE, MAP_HEIGHT/2*TILE_SIZE));
+  enemy = makeObject({x: 100, y: 100});
   objects.push(player);
+  objects.push(enemy);
+
+  socket.on('player', function (data) {
+    console.log('Received');
+    received_player = JSON.parse(data)[0];
+    objects.forEach(function(object) {
+      if (object._id === received_player._id) {
+        object.position.x = received_player.x;
+        object.position.y = received_player.y;
+        process();
+      }
+    });
+  });
 }
 
 function process() {
@@ -79,9 +93,19 @@ function makeObject(position) {
   }
   function draw(context) {
     context.fillStyle = '#000';
-    context.fillRect(position.x, position.y, TILE_SIZE, TILE_SIZE);
+    context.fillRect(
+      position.x,
+      position.y,
+      TILE_SIZE,
+      TILE_SIZE
+    );
     context.fillStyle = '#f00';
-    context.fillRect(position.x+1, position.y+1, TILE_SIZE-2, TILE_SIZE-2);
+    context.fillRect(
+      position.x + 1,
+      position.y + 1,
+      TILE_SIZE - 2,
+      TILE_SIZE - 2
+    );
   }
   return {draw: draw, process: process, speed: speed, position: position};
 }
@@ -128,11 +152,16 @@ onkeyup = function(key) {
     player.speed.Subtract(direction);
 }
 
+/* Remove the comment after Chris merge
 onclick = function(mouseEvent) {
   mouse_click = b2Vec2.Make(mouseEvent.x, mouseEvent.y);
   fire_vector = mouse_click.Copy();
   fire_vector.Subtract(player.position);
   fire_vector.Normalize();
 
+<<<<<<< Updated upstream
   create_bullet(player.position, fire_vector);
 }
+=======
+  create_bullet(player_loc, fire_vector);
+}*/

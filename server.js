@@ -20,6 +20,9 @@ var onConnection = function (socket) {
   socket.emit('server', {status: 'connected'});
 
   socket.on('player', function (data) {
-    console.log(data);
+    // Just proxy it
+    player = JSON.parse(data)[0]; // TBR
+    console.log(player._id); // TBR
+    socket.emit('player', player);
   });
 };
