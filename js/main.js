@@ -62,10 +62,10 @@ function drawObjects() {
 }
 
 var keyDirs = {
-  87: [0, -1],
-  65: [-1, 0],
-  83: [0, 1],
-  68: [1, 0]
+  87: [0, -0.1],
+  65: [-0.1, 0],
+  83: [0, 0.1],
+  68: [0.1, 0]
 }
 
 function pe(a, b) {
@@ -80,11 +80,11 @@ function me(a, b) {
 
 onkeydown = function(k) {
   var dir = keyDirs[k.keyCode];
-  pe(player.vel, dir);
+  if (dir !== undefined) pe(player.vel, dir);
 }
 
 onkeyup = function(k) {
   if (!player) return;
   var dir = keyDirs[k.keyCode];
-  me(player.vel, dir);
+  if (dir !== undefined) me(player.vel, dir);
 }
