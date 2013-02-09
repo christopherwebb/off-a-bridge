@@ -112,6 +112,7 @@ onkeydown = function(key) {
   if (!player)
     return;
 
+  var direction = keyDirections[key.keyCode];
   if (direction !== undefined)
     player.speed.Add(direction);
 }
@@ -122,6 +123,7 @@ onkeyup = function(key) {
   if (!player)
     return;
 
+  var direction = keyDirections[key.keyCode];
   if (direction !== undefined)
     player.speed.Subtract(direction);
 }
