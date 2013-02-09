@@ -89,7 +89,7 @@ function makeObject(position) {
   function process() {
     var ms = speed.Copy();
     ms.Multiply(25);
-    position.Add(ms);
+    player.position.Add(ms);
   }
   function draw(context) {
     context.fillStyle = '#000';
@@ -160,8 +160,11 @@ onclick = function(mouseEvent) {
   fire_vector.Normalize();
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   create_bullet(player.position, fire_vector);
 }
 =======
+=======
+>>>>>>> Stashed changes
   create_bullet(player_loc, fire_vector);
 }*/
