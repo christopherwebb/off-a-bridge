@@ -92,6 +92,11 @@ function drawObjects() {
 }
 
 var keyDirections = {
+  38: [0, -0.1], // up
+  37: [-0.1, 0], // left
+  40: [0, 0.1], // down
+  39: [0.1, 0], // right
+
   87: [0, -0.1],
   65: [-0.1, 0],
   83: [0, 0.1],
