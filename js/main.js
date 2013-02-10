@@ -153,7 +153,17 @@ function makeObject(id, _position, graphic) {
       image = new Image();
       image.src = graphic;
     }
+
+    //context.save();
+    //middle_width = TILE_SIZE * MAP_WIDTH / 2;
+    //middle_height = TILE_SIZE * MAP_HEIGHT / 2;
+    //context.translate(middle_width, middle_height);
+    //context.rotate(90);
+    //context.translate(-middle_width, -middle_height);
     context.drawImage(image, position.x, position.y);
+    //context.rotate(-90);
+    //context.translate(-middle_width, -middle_height);
+    //context.restore();
   }
   return {
     id: id,
