@@ -28,9 +28,9 @@ function setMap(pos, tile) {
   map[mapIndex(pos)] = tile;
 }
 
-function drawMap() {
-  for (var y=0; y<MAP_HEIGHT; y++)
-  for (var x=0; x<MAP_WIDTH; x++) {
+function drawMap(width, height) {
+  for (var y=0; y < height; y++)
+  for (var x=0; x < width; x++) {
 
     var cell = map[mapIndex({x:x, y:y})];
 
@@ -43,7 +43,10 @@ function drawMap() {
     if (cell == 'wall')
 	  displayBlock('#af6', px, py, X_SIZE, Y_SIZE);
     else
+	{
+	  // displayBlock('#eee', px, py, X_SIZE, Y_SIZE);
       displayTile(px, py, X_SIZE, Y_SIZE);
+	}
   }
 }
 

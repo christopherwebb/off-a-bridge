@@ -5,6 +5,7 @@ var canvas;
 var context;
 
 var players = [];
+var bullets = [];
 var me = null;
 var walking = null; // Traffic light to update the server
 
@@ -64,6 +65,10 @@ function main() {
     socket.on('players', function (data) {
       onPlayersReceived(data);
     });
+
+    socket.on('bullet_created', function (data) {
+      onBulletReceived(data);
+    });
   }
 }
 
@@ -106,6 +111,9 @@ function process() {
   players.forEach(function(player) {
     player.process();
   });
+  bullets.forEach(function(bullet) {
+    bullet.process();
+  });
   draw();
 }
 
@@ -122,8 +130,9 @@ function updateServer() {
 
 
 function draw() {
-  drawMap();
+  drawMap(MAP_WIDTH, MAP_HEIGHT);
   drawPlayers();
+  drawBullets();
 }
 
 
@@ -180,18 +189,24 @@ function drawPlayers() {
   });
 }
 
+function drawBullets() {
+  bullets.forEach(function(bullet) {
+    bullet.draw(context);
+  });
+}
 
 function v(x, y) { return b2Vec2.Make(x, y); }
+var distance = 0.1
 var keyDirections = {
-  38: v(0, -0.1), // up
-  37: v(-0.1, 0), // left
-  40: v(0, 0.1), // down
-  39: v(0.1, 0), // right
+  38: v(0, -1 * distance), // up
+  37: v(-1 * distance, 0), // left
+  40: v(0, distance), // down
+  39: v(distance, 0), // right
 
-  87: v(0, -0.1), // up
-  65: v(-0.1, 0), // left
-  83: v(0, 0.1), // down
-  68: v(0.1, 0) // right
+  87: v(0, -1 * distance), // up
+  65: v(-1 * distance, 0), // left
+  83: v(0, distance), // down
+  68: v(distance, 0) // right
 }
 
 
@@ -228,4 +243,64 @@ onkeyup = function(key) {
 
   if (walking)
     walking = clearInterval(walking);
+}
+
+onclick = function(mouseEvent) {
+  mouse_click = b2Vec2.Make(mouseEvent.x, mouseEvent.y);
+  fire_vector = mouse_click.Copy();
+  fire_vector.Subtract(me.position);
+  fire_vector.Normalize();
+  // create_bullet(me.position, fire_vector);
+  // create_bullet(me, fire_vector);
+
+  bullet_data = {
+      id: _get_id(),
+      player_id: me.id,
+      x: me.position.x,
+      y: me.position.y,
+      i: fire_vector.x,
+      j: fire_vector.y
+    }
+
+  socket.emit('create_bullet', bullet_data);
+  add_bullet(bullet_data);
+}
+
+onBulletReceived = function(bullet_data) {
+  if (bullet_data.player_id !== me.id)
+    add_bullet(bullet_data);
+}
+
+add_bullet = function(bullet_data) {
+  bullet = make_bullet(bullet_data)
+  bullets[bullet_data.id] = bullet;
+}
+
+make_bullet = function(bullet_data) {
+  var id = bullet_data.id;
+  var speed = b2Vec2.Make(
+    bullet_data.i * 40,
+    bullet_data.j * 40
+  );
+  var position = b2Vec2.Make(
+    bullet_data.x,
+    bullet_data.y
+  );
+
+  var process = function() {
+    var ms = speed.Copy();
+    position.Add(ms);
+  }
+
+  var draw = function(context) {
+    context.fillStyle = '#fff';
+    context.fillRect(
+      position.x,
+      position.y,
+      TILE_SIZE / 3,
+      TILE_SIZE / 3
+    );
+  }
+
+  return {id: id, draw: draw, process: process, speed: speed, position: position};
 }
