@@ -45,26 +45,12 @@ function main() {
   context = canvas.getContext('2d');
 
   setInterval(process, 1000 / 60);
-  setInterval(updateServer, 10);
 
   me = makeObject(
     _get_id(),
     b2Vec2.Make(MAP_WIDTH/2*TILE_SIZE, MAP_HEIGHT/2*TILE_SIZE)
   );
   players[me.id] = me;
-
-
-  // socket.on('player', function (data) {
-    // console.log('Received');
-    // received_player = JSON.parse(data)[0];
-    // objects.forEach(function(object) {
-      // if (object._id === received_player._id) {
-        // object.position.x = received_player.x;
-        // object.position.y = received_player.y;
-        // process();
-      // }
-    // });
-  // });
 
   socket.on('player', function (data) {
     onPlayerReceived(data);
@@ -87,7 +73,6 @@ function onPlayerReceived(player) {
       process();
     } else {
       // One ID that I don't know? Let's update the list!
-      console.log('What is going on here?');
       socket.emit('retrieve');
     }
   }
