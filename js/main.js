@@ -11,6 +11,7 @@ var walking = null; // Traffic light to update the server
 var mouse_movement = null;
 
 var socket = io.connect('http://localhost:8000');
+var world = null;
 
 
 function _get_id() {
@@ -24,7 +25,7 @@ function main() {
   worldAABB.maxVertex.Set(1000, 1000);
   var gravity = b2Vec2.Make(0, 0);
   var doSleep = true;
-  var world = new b2World(worldAABB, gravity, doSleep);
+  world = new b2World(worldAABB, gravity, doSleep);
 
   for (var y=0; y<MAP_HEIGHT; y++)
   for (var x=0; x<MAP_WIDTH; x++) {
@@ -109,6 +110,10 @@ function onPlayersReceived(received_players) {
 
 
 function process() {
+  var timeStep = 1.0 / 60;
+  var iteration = 1;
+  world.Step(timeStep, iteration);
+
   players.forEach(function(player) {
     player.process();
   });
@@ -148,7 +153,72 @@ function makeObject(id, _position, graphic) {
     ms.Multiply(25);
     position.Add(ms);
   }
-  var draw = function(context, _angle) {
+  var draw = function(context) {
+    var posX = position.x - TILE_SIZE / 2;
+    var posY = position.y - TILE_SIZE / 2;
+    context.fillStyle = '#000';
+    context.fillRect(
+      posX,
+      posY,
+      TILE_SIZE,
+      TILE_SIZE
+    );
+    context.fillStyle = '#f00';
+    context.fillRect(
+      posX + 1,
+      posY + 1,
+      TILE_SIZE - 2,
+      TILE_SIZE - 2
+    );
+    if (!image) {
+      console.log(graphic);
+      image = new Image();
+      image.src = graphic;
+    }
+    context.drawImage(
+      image,
+      position.x, position.y,
+      20, 20,
+      position.x, position.y,
+      20, 20
+    );
+  }
+  return {
+    id: id,
+    draw: draw,
+    process: process,
+    speed: speed,
+    position: position,
+    image: image
+  }
+}
+
+function makePlayerObject(id, _position, graphic) {
+  var id = id;
+  var speed = b2Vec2.Make(0, 0);
+  var position = b2Vec2.Make(_position.x, _position.y);
+  var image = null;
+
+  var process = function() {
+    var ms = speed.Copy();
+    ms.Multiply(25);
+    position.Add(ms);
+  }
+  var draw = function(context) {
+    context.fillStyle = '#000';
+    context.fillRect(
+      position.x,
+      position.y,
+      TILE_SIZE,
+      TILE_SIZE
+    );
+    context.fillStyle = '#f00';
+    context.fillRect(
+      position.x + 1,
+      position.y + 1,
+      TILE_SIZE - 2,
+      TILE_SIZE - 2
+    );
     if (!image) {
       console.log(graphic);
       image = new Image();
@@ -181,7 +251,6 @@ function makeObject(id, _position, graphic) {
     angle: angle
   }
 }
-
 
 function drawPlayers() {
   players.forEach(function(player) {
@@ -261,7 +330,7 @@ onmousemove = function(mouseEvent) {
 
 onclick = function(mouseEvent) {
   var mouse_click = b2Vec2.Make(mouseEvent.x, mouseEvent.y);
-  fire_vector = mouse_click.Copy();
+  var fire_vector = mouse_click.Copy();
   fire_vector.Subtract(me.position);
   fire_vector.Normalize();
 
@@ -291,17 +360,34 @@ add_bullet = function(bullet_data) {
 make_bullet = function(bullet_data) {
   var id = bullet_data.id;
   var speed = b2Vec2.Make(
-    bullet_data.i * 40,
-    bullet_data.j * 40
+    bullet_data.i * 400,
+    bullet_data.j * 400
   );
   var position = b2Vec2.Make(
     bullet_data.x,
     bullet_data.y
   );
 
+  var circleSd = new b2CircleDef();
+  circleSd.density = 1.0;
+  circleSd.radius = 20;
+  circleSd.restitution = 1.0;
+  circleSd.friction = 0;
+  var circleBd = new b2BodyDef();
+  circleBd.AddShape(circleSd);
+  circleBd.bullet = true;
+  circleBd.position = position;
+  circleBd.angularDamping = 0.1;
+  circleBd.linearDamping = 0.0;
+  circleBd.linearVelocity = speed;
+  
+  var circleBody = world.CreateBody(circleBd);
+
   var process = function() {
-    var ms = speed.Copy();
-    position.Add(ms);
+    // bullet.position = circleBd.position;
+  //  var ms = speed.Copy();
+  //  position.Add(ms);
+    position = circleBody.m_position;
   }
 
   var draw = function(context) {
@@ -315,29 +401,4 @@ make_bullet = function(bullet_data) {
   }
 
   return {id: id, draw: draw, process: process, speed: speed, position: position};
-}
-
-create_bullet = function(player_loc, bullet_vector) {
-  var circleSd = new b2CircleDef();
-  circleSd.density = 1.0;
-  circleSd.radius = 20;
-  circleSd.restitution = 1.0;
-  circleSd.friction = 0;
-  var circleBd = new b2BodyDef();
-  circleBd.AddShape(circleSd);
-  circleBd.type = b2_kinematicBody;
-  circleBd.bullet = true;
-  circleBd.position.Set(player_loc.x,player_loc.y);
-  var circleBody = world.CreateBody(circleBd);
-
-  var bullet = makeObject({
-    x: player_loc.x,
-    y: player_loc.y
-  }, tileSize / 8);
-
-  bullet.process = function() {
-    bullet.position.x = circleBd.position.x;
-    bullet.position.y = circleBd.position.y;
-  }
-  objects.push(bullet);
 }
