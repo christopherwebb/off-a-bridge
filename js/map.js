@@ -1,5 +1,5 @@
 var TILE_SIZE = 16;
-var GRID_LINE = 1; // set to 1 for a grid
+var GRID_LINE = 0; // set to 1 for a grid
 var X_SIZE = TILE_SIZE - (2 * GRID_LINE);
 var Y_SIZE = X_SIZE;
 

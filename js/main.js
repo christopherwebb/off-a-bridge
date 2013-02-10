@@ -8,6 +8,7 @@ var players = [];
 var bullets = [];
 var me = null;
 var walking = null; // Traffic light to update the server
+var mouse_movement = null;
 
 var socket = io.connect('http://localhost:8000');
 
@@ -141,29 +142,35 @@ function makeObject(id, _position, graphic) {
   var speed = b2Vec2.Make(0, 0);
   var position = b2Vec2.Make(_position.x, _position.y);
   var image = null;
+  var angle = 0;
 
   var process = function() {
     var ms = speed.Copy();
     ms.Multiply(25);
     position.Add(ms);
   }
-  var draw = function(context) {
+  var draw = function(context, _angle) {
     if (!image) {
       console.log(graphic);
       image = new Image();
       image.src = graphic;
     }
 
-    //context.save();
-    //middle_width = TILE_SIZE * MAP_WIDTH / 2;
-    //middle_height = TILE_SIZE * MAP_HEIGHT / 2;
+    angle = _angle || angle;
+
+    middle_width = TILE_SIZE * MAP_WIDTH / 2;
+    middle_height = TILE_SIZE * MAP_HEIGHT / 2;
+
+    context.save();
     //context.translate(middle_width, middle_height);
-    //context.rotate(90);
+    context.translate(position.x, position.y);
+    context.rotate(angle + 1.5);
+
     //context.translate(-middle_width, -middle_height);
-    context.drawImage(image, position.x, position.y);
-    //context.rotate(-90);
-    //context.translate(-middle_width, -middle_height);
-    //context.restore();
+    context.translate(-position.x, -position.y);
+    context.drawImage(image, position.x, position.y, 20, 20);
+    context.rotate(-angle);
+    context.restore();
   }
   return {
     id: id,
@@ -171,7 +178,8 @@ function makeObject(id, _position, graphic) {
     process: process,
     speed: speed,
     position: position,
-    image: image
+    image: image,
+    angle: angle
   }
 }
 
@@ -238,9 +246,22 @@ onkeyup = function(key) {
     walking = clearInterval(walking);
 }
 
+function calculateAngle(position, mouseEvent) {
+  var x = mouseEvent.x - position.x;
+  var y = mouseEvent.y - position.y;
+  var arctan = Math.atan2(y, x);
+  return y < 0 ? (Math.PI * 2) + arctan : arctan;
+  return Math.floor(theta * 180 / Math.PI);
+}
+
+onmousemove = function(mouseEvent) {
+  mouse_movement = b2Vec2.Make(mouseEvent.x, mouseEvent.y);
+  me.angle = calculateAngle(me.position, mouseEvent);
+  me.draw(context, me.angle);
+}
+
 onclick = function(mouseEvent) {
-  mouse_click = b2Vec2.Make(mouseEvent.x, mouseEvent.y);
-  fire_vector = mouse_click.Copy();
+  fire_vector = mouse_movement.Copy();
   fire_vector.Subtract(me.position);
   fire_vector.Normalize();
   // create_bullet(me.position, fire_vector);
