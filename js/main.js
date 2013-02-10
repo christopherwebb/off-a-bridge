@@ -171,7 +171,6 @@ function makeObject(id, _position, graphic) {
       TILE_SIZE - 2
     );
     if (!image) {
-      console.log(graphic);
       image = new Image();
       image.src = graphic;
     }
@@ -207,7 +206,6 @@ function makePlayerObject(id, _position, graphic) {
   }
   var draw = function(context, _angle) {
     if (!image) {
-      console.log(graphic);
       image = new Image();
       image.src = graphic;
     }
@@ -337,7 +335,6 @@ onclick = function(mouseEvent) {
 }
 
 onBulletReceived = function(bullet_data) {
-  console.log('shit');
   if (bullet_data.player_id !== me.id) {
     add_bullet(JSON.parse(bullet_data)[0]);
   }
