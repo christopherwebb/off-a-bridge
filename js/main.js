@@ -139,7 +139,7 @@ function draw() {
 function makeObject(id, _position, graphic) {
   var id = id;
   var speed = b2Vec2.Make(0, 0);
-  var position = _position;
+  var position = b2Vec2.Make(_position.x, _position.y);
   var image = null;
 
   var process = function() {
@@ -155,13 +155,13 @@ function makeObject(id, _position, graphic) {
       TILE_SIZE,
       TILE_SIZE
     );
-    /*context.fillStyle = '#f00';
+    context.fillStyle = '#f00';
     context.fillRect(
       position.x + 1,
       position.y + 1,
       TILE_SIZE - 2,
       TILE_SIZE - 2
-    );*/
+    );
     if (!image) {
       console.log(graphic);
       image = new Image();
