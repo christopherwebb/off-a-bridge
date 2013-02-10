@@ -311,8 +311,10 @@ function calculateAngle(position, mouseEvent) {
 
 onmousemove = function(mouseEvent) {
   mouse_movement = b2Vec2.Make(mouseEvent.x, mouseEvent.y);
-  me.angle = calculateAngle(me.position, mouseEvent);
-  me.draw(context, me.angle);
+  if (me.position) {
+    me.angle = calculateAngle(me.position, mouseEvent);
+    me.draw(context, me.angle);
+  }
 }
 
 onclick = function(mouseEvent) {
@@ -335,8 +337,10 @@ onclick = function(mouseEvent) {
 }
 
 onBulletReceived = function(bullet_data) {
-  if (bullet_data.player_id !== me.id)
-    add_bullet(bullet_data);
+  console.log('shit');
+  if (bullet_data.player_id !== me.id) {
+    add_bullet(JSON.parse(bullet_data)[0]);
+  }
 }
 
 add_bullet = function(bullet_data) {
@@ -367,7 +371,7 @@ make_bullet = function(bullet_data) {
   circleBd.angularDamping = 0.1;
   circleBd.linearDamping = 0.0;
   circleBd.linearVelocity = speed;
-  
+
   var circleBody = world.CreateBody(circleBd);
 
   var process = function() {
