@@ -25,7 +25,8 @@ var onConnection = function (socket) {
   socket.on('player', function (data) {
     player = JSON.parse(data)[0];
 
-    players[player.id] = player;
+    if (player.id)
+      players[player.id] = player;
 
     clients.forEach(function (client) {
       // Use broadcast? This should be able to be used with WAN too
@@ -35,7 +36,6 @@ var onConnection = function (socket) {
 
   socket.on('create_bullet', function (data) {
     clients.forEach(function (client) {
-      // Use broadcast? This should be able to be used with WAN too
       client.emit('bullet_created', data);
     });
   });
