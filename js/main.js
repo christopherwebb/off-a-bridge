@@ -48,17 +48,17 @@ function main() {
   objects.push(player);
   objects.push(enemy);
 
-  socket.on('player', function (data) {
-    console.log('Received');
-    received_player = JSON.parse(data)[0];
-    objects.forEach(function(object) {
-      if (object._id === received_player._id) {
-        object.position.x = received_player.x;
-        object.position.y = received_player.y;
-        process();
-      }
-    });
-  });
+  // socket.on('player', function (data) {
+    // console.log('Received');
+    // received_player = JSON.parse(data)[0];
+    // objects.forEach(function(object) {
+      // if (object._id === received_player._id) {
+        // object.position.x = received_player.x;
+        // object.position.y = received_player.y;
+        // process();
+      // }
+    // });
+  // });
 }
 
 function process() {
