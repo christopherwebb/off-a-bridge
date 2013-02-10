@@ -51,7 +51,7 @@ function main() {
 
   setInterval(process, 1000 / 60);
 
-  me = makeObject(
+  me = makePlayerObject(
     _get_id(),
     b2Vec2.Make(MAP_WIDTH/2*TILE_SIZE, MAP_HEIGHT/2*TILE_SIZE),
     'img/player1.png'
@@ -95,7 +95,7 @@ function onPlayersReceived(received_players) {
   received_players.forEach(function(player) {
     if (player && player.id !== me.id) {
       // With random id it can be possible a collision here
-      player = makeObject(
+      player = makePlayerObject(
         player.id,
         {
           x: player.x,
@@ -198,27 +198,14 @@ function makePlayerObject(id, _position, graphic) {
   var speed = b2Vec2.Make(0, 0);
   var position = b2Vec2.Make(_position.x, _position.y);
   var image = null;
+  var angle = 0;
 
   var process = function() {
     var ms = speed.Copy();
     ms.Multiply(25);
     position.Add(ms);
   }
-  var draw = function(context) {
-    context.fillStyle = '#000';
-    context.fillRect(
-      position.x,
-      position.y,
-      TILE_SIZE,
-      TILE_SIZE
-    );
-    context.fillStyle = '#f00';
-    context.fillRect(
-      position.x + 1,
-      position.y + 1,
-      TILE_SIZE - 2,
-      TILE_SIZE - 2
-    );
+  var draw = function(context, _angle) {
     if (!image) {
       console.log(graphic);
       image = new Image();
