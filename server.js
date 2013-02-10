@@ -33,6 +33,13 @@ var onConnection = function (socket) {
     });
   });
 
+  socket.on('create_bullet', function (data) {
+    clients.forEach(function (client) {
+      // Use broadcast? This should be able to be used with WAN too
+      client.emit('bullet_created', data);
+    });
+  });
+
   socket.on('retrieve', function () {
     clients.push(socket);
     socket.emit('players', players);
