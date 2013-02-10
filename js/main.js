@@ -148,7 +148,7 @@ function makeObject(id, _position, graphic) {
     position.Add(ms);
   }
   var draw = function(context) {
-    context.fillStyle = '#000';
+    /*context.fillStyle = '#000';
     context.fillRect(
       position.x,
       position.y,
@@ -159,16 +159,15 @@ function makeObject(id, _position, graphic) {
     context.fillRect(
       position.x + 1,
       position.y + 1,
-      TILE_SIZE - 2,
-      TILE_SIZE - 2
-    );
+      4,
+      4
+    );*/
     if (!image) {
       console.log(graphic);
       image = new Image();
       image.src = graphic;
     }
     context.drawImage(
-      image,
       position.x, position.y,
       20, 20,
       position.x, position.y,
