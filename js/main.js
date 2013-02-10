@@ -148,31 +148,12 @@ function makeObject(id, _position, graphic) {
     position.Add(ms);
   }
   var draw = function(context) {
-    /*context.fillStyle = '#000';
-    context.fillRect(
-      position.x,
-      position.y,
-      TILE_SIZE,
-      TILE_SIZE
-    );
-    context.fillStyle = '#f00';
-    context.fillRect(
-      position.x + 1,
-      position.y + 1,
-      4,
-      4
-    );*/
     if (!image) {
       console.log(graphic);
       image = new Image();
       image.src = graphic;
     }
-    context.drawImage(
-      position.x, position.y,
-      20, 20,
-      position.x, position.y,
-      20, 20
-    );
+    context.drawImage(image, position.x, position.y);
   }
   return {
     id: id,
