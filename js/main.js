@@ -1,14 +1,14 @@
-var MAX_SPEED = 1;
+// Set to false if you want to turn off server connections
+var SERVER = true;
 
 var canvas;
 var context;
 
 var players = [];
 var me = null;
+var walking = null; // Traffic light to update the server
 
 var socket = io.connect('http://localhost:8000');
-
-var SERVER = true;  // Set to false if you want to turn off server connections
 
 
 function _get_id() {
@@ -179,6 +179,9 @@ var keyStates = {};
 
 
 onkeydown = function(key) {
+  if (!walking && SERVER)
+    walking = setInterval(updateServer, 100);
+
   if (keyStates[key.keyCode])
     return;
 
@@ -190,9 +193,6 @@ onkeydown = function(key) {
   var direction = keyDirections[key.keyCode];
   if (direction !== undefined)
     me.speed.Add(direction);
-
-  if (SERVER)
-    updateServer();
 }
 
 
@@ -206,16 +206,6 @@ onkeyup = function(key) {
   if (direction !== undefined)
     me.speed.Subtract(direction);
 
-  if (SERVER)
-    updateServer();
+  if (walking)
+    walking = clearInterval(walking);
 }
-
-/* Remove the comment after Chris merge
-onclick = function(mouseEvent) {
-  mouse_click = b2Vec2.Make(mouseEvent.x, mouseEvent.y);
-  fire_vector = mouse_click.Copy();
-  fire_vector.Subtract(player.position);
-  fire_vector.Normalize();
-  create_bullet(player.position, fire_vector);
-  create_bullet(player_loc, fire_vector);
-}*/
