@@ -50,7 +50,8 @@ function main() {
 
   me = makeObject(
     _get_id(),
-    b2Vec2.Make(MAP_WIDTH/2*TILE_SIZE, MAP_HEIGHT/2*TILE_SIZE)
+    b2Vec2.Make(MAP_WIDTH/2*TILE_SIZE, MAP_HEIGHT/2*TILE_SIZE),
+    'img/player1.png'
   );
   players[me.id] = me;
 
@@ -92,7 +93,8 @@ function onPlayersReceived(received_players) {
         {
           x: player.x,
           y: player.y
-        }
+        },
+        'img/player2.png'
       )
       players[player.id] = player;
     }
@@ -125,7 +127,7 @@ function draw() {
 }
 
 
-function makeObject(id, position) {
+function makeObject(id, position, graphic) {
   var id = id;
   var speed = b2Vec2.Make(0, 0);
 
@@ -142,15 +144,33 @@ function makeObject(id, position) {
       TILE_SIZE,
       TILE_SIZE
     );
-    context.fillStyle = '#f00';
+    /*context.fillStyle = '#f00';
     context.fillRect(
       position.x + 1,
       position.y + 1,
       TILE_SIZE - 2,
       TILE_SIZE - 2
+    );*/
+    if (!me.image) {
+      console.log(graphic);
+      me.image = new Image();
+      me.image.src = graphic;
+    }
+    context.drawImage(
+      me.image,
+      position.x, position.y,
+      20, 20,
+      position.x, position.y,
+      20, 20
     );
   }
-  return {id: id, draw: draw, process: process, speed: speed, position: position};
+  return {
+    id: id,
+    draw: draw,
+    process: process,
+    speed: speed,
+    position: position
+  }
 }
 
 

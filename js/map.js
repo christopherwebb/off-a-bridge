@@ -36,7 +36,7 @@ function drawMap() {
 
     var px = GRID_LINE + x * TILE_SIZE;
     var py = GRID_LINE + y * TILE_SIZE;
-	
+
 	if (GRID_LINE > 0)
 		displayBlock('#000', px, py, TILE_SIZE, TILE_SIZE);
 
