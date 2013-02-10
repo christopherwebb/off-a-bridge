@@ -120,7 +120,7 @@ function updateServer() {
 
 
 function draw() {
-  drawMap();
+  drawMap(MAP_WIDTH, MAP_HEIGHT);
   drawPlayers();
 }
 
@@ -162,16 +162,17 @@ function drawPlayers() {
 
 
 function v(x, y) { return b2Vec2.Make(x, y); }
+var distance = 0.1
 var keyDirections = {
-  38: v(0, -0.1), // up
-  37: v(-0.1, 0), // left
-  40: v(0, 0.1), // down
-  39: v(0.1, 0), // right
+  38: v(0, -1 * distance), // up
+  37: v(-1 * distance, 0), // left
+  40: v(0, distance), // down
+  39: v(distance, 0), // right
 
-  87: v(0, -0.1), // up
-  65: v(-0.1, 0), // left
-  83: v(0, 0.1), // down
-  68: v(0.1, 0) // right
+  87: v(0, -1 * distance), // up
+  65: v(-1 * distance, 0), // left
+  83: v(0, distance), // down
+  68: v(distance, 0) // right
 }
 
 
