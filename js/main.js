@@ -134,16 +134,17 @@ function draw() {
 }
 
 
-function makeObject(id, position) {
+function makeObject(id, _position) {
   var id = id;
   var speed = b2Vec2.Make(0, 0);
+  var position = _position;
 
-  function process() {
+  var process = function() {
     var ms = speed.Copy();
     ms.Multiply(25);
-    me.position.Add(ms);
+    position.Add(ms);
   }
-  function draw(context) {
+  var draw = function(context) {
     context.fillStyle = '#000';
     context.fillRect(
       position.x,
