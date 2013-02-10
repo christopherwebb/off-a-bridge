@@ -4,6 +4,7 @@ var canvas;
 var context;
 
 var players = [];
+var bullets = [];
 var me = null;
 
 var socket = io.connect('http://localhost:8000');
@@ -63,6 +64,10 @@ function main() {
     socket.on('players', function (data) {
       onPlayersReceived(data);
     });
+
+    socket.on('bullet_created', function (data) {
+      onBulletReceived(data);
+    });
   }
 }
 
@@ -104,6 +109,9 @@ function process() {
   players.forEach(function(player) {
     player.process();
   });
+  bullets.forEach(function(bullet) {
+    bullet.process();
+  });
   draw();
 }
 
@@ -122,6 +130,7 @@ function updateServer() {
 function draw() {
   drawMap(MAP_WIDTH, MAP_HEIGHT);
   drawPlayers();
+  drawBullets();
 }
 
 
@@ -160,6 +169,11 @@ function drawPlayers() {
   });
 }
 
+function drawBullets() {
+  bullets.forEach(function(bullet) {
+    bullet.draw(context);
+  });
+}
 
 function v(x, y) { return b2Vec2.Make(x, y); }
 var distance = 0.1
@@ -211,12 +225,62 @@ onkeyup = function(key) {
     updateServer();
 }
 
-/* Remove the comment after Chris merge
 onclick = function(mouseEvent) {
   mouse_click = b2Vec2.Make(mouseEvent.x, mouseEvent.y);
   fire_vector = mouse_click.Copy();
-  fire_vector.Subtract(player.position);
+  fire_vector.Subtract(me.position);
   fire_vector.Normalize();
-  create_bullet(player.position, fire_vector);
-  create_bullet(player_loc, fire_vector);
-}*/
+  // create_bullet(me.position, fire_vector);
+  // create_bullet(me, fire_vector);
+
+  bullet_data = {
+      id: _get_id(),
+      player_id: me.id,
+      x: me.position.x,
+      y: me.position.y,
+      i: fire_vector.x,
+      j: fire_vector.y
+    }
+
+  socket.emit('create_bullet', bullet_data);
+  add_bullet(bullet_data);
+}
+
+onBulletReceived = function(bullet_data) {
+  if (bullet_data.player_id !== me.id)
+    add_bullet(bullet_data);
+}
+
+add_bullet = function(bullet_data) {
+  bullet = make_bullet(bullet_data)
+  bullets[bullet_data.id] = bullet;
+}
+
+make_bullet = function(bullet_data) {
+  var id = bullet_data.id;
+  var speed = b2Vec2.Make(
+    bullet_data.i * 40,
+    bullet_data.j * 40
+  );
+  var position = b2Vec2.Make(
+    bullet_data.x,
+    bullet_data.y
+  );
+
+  var process = function() {
+    var ms = speed.Copy();
+    position.Add(ms);
+  }
+
+  var draw = function(context) {
+    context.fillStyle = '#fff';
+    context.fillRect(
+      position.x,
+      position.y,
+      TILE_SIZE / 3,
+      TILE_SIZE / 3
+    );
+  }
+
+  return {id: id, draw: draw, process: process, speed: speed, position: position};
+}
