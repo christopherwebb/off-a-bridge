@@ -56,6 +56,7 @@ function displayBlock(colour, px, py, xSize, ySize) {
 }
 
 function displayTile(px, py, xSize, ySize){
+return;
 	context.drawImage(background, px, py, xSize, ySize, px, py, xSize, ySize);
 	context.drawImage(islands,    px, py, xSize, ySize, px, py, xSize, ySize);
 	context.drawImage(bridges,    px, py, xSize, ySize, px, py, xSize, ySize);
