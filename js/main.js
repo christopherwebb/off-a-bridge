@@ -13,6 +13,8 @@ var mouse_movement = null;
 var socket = io.connect('http://localhost:8000');
 var world = null;
 
+var exploded = false;
+
 
 function _get_id() {
   // TODO: perhaps we need something more unique here
@@ -171,7 +173,6 @@ function makeObject(id, _position, graphic) {
       TILE_SIZE - 2
     );
     if (!image) {
-      console.log(graphic);
       image = new Image();
       image.src = graphic;
     }
@@ -207,7 +208,6 @@ function makePlayerObject(id, _position, graphic) {
   }
   var draw = function(context, _angle) {
     if (!image) {
-      console.log(graphic);
       image = new Image();
       image.src = graphic;
     }
@@ -281,6 +281,9 @@ onkeydown = function(key) {
   if (!me)
     return;
 
+  if (exploded)
+    return;
+
   var direction = keyDirections[key.keyCode];
   if (direction !== undefined)
     me.speed.Add(direction);
@@ -291,6 +294,9 @@ onkeyup = function(key) {
   delete keyStates[key.keyCode];
 
   if (!me)
+    return;
+
+  if (exploded)
     return;
 
   var direction = keyDirections[key.keyCode];
@@ -383,7 +389,10 @@ make_bullet = function(bullet_data) {
     {
       var distance = b2Math.SubtractVV(position, me.position);
       if (distance.Length() < TILE_SIZE / 2)
+      {
         console.log('You were hit');
+        exploded = true;
+      }
     }
   }
 
