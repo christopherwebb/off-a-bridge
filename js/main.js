@@ -337,7 +337,6 @@ onclick = function(mouseEvent) {
 }
 
 onBulletReceived = function(bullet_data) {
-  console.log('shit');
   if (bullet_data.player_id !== me.id) {
     add_bullet(JSON.parse(bullet_data)[0]);
   }
@@ -379,6 +378,13 @@ make_bullet = function(bullet_data) {
   //  var ms = speed.Copy();
   //  position.Add(ms);
     position = circleBody.m_position;
+
+    if (bullet_data.player_id !== me.id)
+    {
+      var distance = b2Math.SubtractVV(position, me.position);
+      if (distance.Length() < TILE_SIZE / 2)
+        console.log('You were hit');
+    }
   }
 
   var draw = function(context) {
