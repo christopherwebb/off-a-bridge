@@ -8,6 +8,8 @@ var me = null;
 
 var socket = io.connect('http://localhost:8000');
 
+var SERVER = true;  // Set to false if you want to turn off server connections
+
 
 function _get_id() {
   // TODO: perhaps we need something more unique here
@@ -52,15 +54,16 @@ function main() {
   );
   players[me.id] = me;
 
-  socket.on('player', function (data) {
-    onPlayerReceived(data);
-  });
+  if (SERVER) {
+    socket.on('player', function (data) {
+      onPlayerReceived(data);
+    });
 
-  socket.emit('retrieve'); // ask for the enemies!
-  socket.on('players', function (data) {
-    onPlayersReceived(data);
-  });
-
+    socket.emit('retrieve'); // ask for the enemies!
+    socket.on('players', function (data) {
+      onPlayersReceived(data);
+    });
+  }
 }
 
 
@@ -188,7 +191,8 @@ onkeydown = function(key) {
   if (direction !== undefined)
     me.speed.Add(direction);
 
-  updateServer();
+  if (SERVER)
+    updateServer();
 }
 
 
@@ -202,7 +206,8 @@ onkeyup = function(key) {
   if (direction !== undefined)
     me.speed.Subtract(direction);
 
-  updateServer();
+  if (SERVER)
+    updateServer();
 }
 
 /* Remove the comment after Chris merge
