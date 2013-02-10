@@ -136,10 +136,11 @@ function draw() {
 }
 
 
-function makeObject(id, position, graphic) {
+function makeObject(id, _position, graphic) {
   var id = id;
   var speed = b2Vec2.Make(0, 0);
   var position = _position;
+  var image = null;
 
   var process = function() {
     var ms = speed.Copy();
@@ -161,13 +162,13 @@ function makeObject(id, position, graphic) {
       TILE_SIZE - 2,
       TILE_SIZE - 2
     );*/
-    if (!me.image) {
+    if (!image) {
       console.log(graphic);
-      me.image = new Image();
-      me.image.src = graphic;
+      image = new Image();
+      image.src = graphic;
     }
     context.drawImage(
-      me.image,
+      image,
       position.x, position.y,
       20, 20,
       position.x, position.y,
@@ -179,7 +180,8 @@ function makeObject(id, position, graphic) {
     draw: draw,
     process: process,
     speed: speed,
-    position: position
+    position: position,
+    image: image
   }
 }
 
