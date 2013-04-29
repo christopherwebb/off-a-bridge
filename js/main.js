@@ -212,6 +212,13 @@ function makePlayerObject(id, _position, graphic) {
       image.src = graphic;
     }
 
+    if (exploded && id === me.id) {
+      image = new Image();
+      image.src = 'img/explosion.png';
+      context.drawImage(image, position.x, position.y, 20, 20);
+      return
+    }
+
     angle = _angle || angle;
 
     middle_width = TILE_SIZE * MAP_WIDTH / 2;
